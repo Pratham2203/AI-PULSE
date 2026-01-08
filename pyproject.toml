@@ -1,7 +1,11 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "ai-news-aggregator"
 version = "0.1.0"
-description = "Add your description here"
+description = "AI-powered news aggregator and digest generator"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
@@ -19,6 +23,12 @@ dependencies = [
     "sqlalchemy>=2.0.44",
     "youtube-transcript-api>=1.2.3",
 ]
+
+[tool.setuptools.packages.find]
+# Only include the 'app' directory to avoid the "Multiple top-level packages" error
+include = ["app*"]
+# Explicitly exclude the 'docker' directory from the build
+exclude = ["docker*"]
 
 [dependency-groups]
 dev = [
