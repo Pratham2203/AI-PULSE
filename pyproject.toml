@@ -24,13 +24,6 @@ dependencies = [
     "youtube-transcript-api>=1.2.3",
 ]
 
-[tool.setuptools.packages.find]
-# Only include the 'app' directory to avoid the "Multiple top-level packages" error
-include = ["app*"]
-# Explicitly exclude the 'docker' directory from the build
-exclude = ["docker*"]
-
-[dependency-groups]
-dev = [
-    "ipykernel>=7.1.0",
-]
+[tool.setuptools]
+# Explicitly include only the app package to avoid multiple-top-level-package errors
+packages = ["app"]
