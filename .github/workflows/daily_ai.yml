@@ -1,7 +1,7 @@
 name: Daily AI News Job
 on:
   schedule:
-    - cron: "0 1 * * *"
+    - cron: "0 6 * * *"
   workflow_dispatch: # Allows manual trigger
 
 jobs:
@@ -11,11 +11,11 @@ jobs:
     # This spins up the actual PostgreSQL database
     services:
       postgres:
-        image: postgres:15
+        image: postgres:17
         env:
           POSTGRES_DB: ai_news_aggregator
-          POSTGRES_USER: ai_news_user
-          POSTGRES_PASSWORD: password123
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
         ports:
           - 5432:5432
         # Wait for the DB to be ready before starting the script
@@ -38,10 +38,18 @@ jobs:
           pip install uv
           uv pip install --system . 
 
+      - name: Wait for PostgreSQL
+        run: |
+          until pg_isready -h localhost -p 5432 -U postgres; do
+            echo "Waiting for database..."
+            sleep 2
+          done
+      
+
       - name: Run AI Script
         env:
           # We construct the URL to point to the service above
-          DATABASE_URL: postgresql://ai_news_user:password123@localhost:5432/ai_news_aggregator
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/ai_news_aggregator
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           MY_EMAIL: ${{ secrets.MY_EMAIL }}
           APP_PASSWORD: ${{ secrets.APP_PASSWORD }}
