@@ -1,64 +1,64 @@
-name: Daily AI News Job
-on:
-  schedule:
-    - cron: "0 6 * * *"
-  workflow_dispatch: # Allows manual trigger
+# name: Daily AI News Job
+# on:
+#   schedule:
+#     - cron: "0 6 * * *"
+#   workflow_dispatch: # Allows manual trigger
 
-jobs:
-  run-ai:
-    runs-on: ubuntu-latest
+# jobs:
+#   run-ai:
+#     runs-on: ubuntu-latest
     
-    # This spins up the actual PostgreSQL database
-    services:
-      postgres:
-        image: postgres:17
-        env:
-          POSTGRES_DB: ai_news_aggregator
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-        ports:
-          - 5432:5432
-        # Wait for the DB to be ready before starting the script
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+#     # This spins up the actual PostgreSQL database
+#     services:
+#       postgres:
+#         image: postgres:17
+#         env:
+#           POSTGRES_DB: ai_news_aggregator
+#           POSTGRES_USER: postgres
+#           POSTGRES_PASSWORD: postgres
+#         ports:
+#           - 5432:5432
+#         # Wait for the DB to be ready before starting the script
+#         options: >-
+#           --health-cmd pg_isready
+#           --health-interval 10s
+#           --health-timeout 5s
+#           --health-retries 5
 
-    steps:
-      - uses: actions/checkout@v4
+#     steps:
+#       - uses: actions/checkout@v4
       
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
+#       - name: Set up Python
+#         uses: actions/setup-python@v5
+#         with:
+#           python-version: '3.12'
           
-      - name: Install dependencies
-        run: |
-          pip install uv
-          uv pip install --system . 
+#       - name: Install dependencies
+#         run: |
+#           pip install uv
+#           uv pip install --system . 
 
-      - name: Wait for PostgreSQL
-        run: |
-          until pg_isready -h localhost -p 5432 -U postgres; do
-            echo "Waiting for database..."
-            sleep 2
-          done
-      - name: Create Database Tables
-        env:
-          # These must match the 'services: postgres: env:' section of your YAML
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: ai_news_aggregator
-          POSTGRES_HOST: localhost
-          POSTGRES_PORT: 5432
-        run: python app/database/create_tables.py
+#       - name: Wait for PostgreSQL
+#         run: |
+#           until pg_isready -h localhost -p 5432 -U postgres; do
+#             echo "Waiting for database..."
+#             sleep 2
+#           done
+#       - name: Create Database Tables
+#         env:
+#           # These must match the 'services: postgres: env:' section of your YAML
+#           POSTGRES_USER: postgres
+#           POSTGRES_PASSWORD: postgres
+#           POSTGRES_DB: ai_news_aggregator
+#           POSTGRES_HOST: localhost
+#           POSTGRES_PORT: 5432
+#         run: python app/database/create_tables.py
 
-      - name: Run AI Script
-        env:
-          # We construct the URL to point to the service above
-          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/ai_news_aggregator
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          MY_EMAIL: ${{ secrets.MY_EMAIL }}
-          APP_PASSWORD: ${{ secrets.APP_PASSWORD }}
-        run: python main.py
+#       - name: Run AI Script
+#         env:
+#           # We construct the URL to point to the service above
+#           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/ai_news_aggregator
+#           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+#           MY_EMAIL: ${{ secrets.MY_EMAIL }}
+#           APP_PASSWORD: ${{ secrets.APP_PASSWORD }}
+#         run: python main.py
